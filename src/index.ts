@@ -41,33 +41,70 @@ function evergreenMessage(config: Config, rawMsgData: RawMessageData) {
 		RubyGems: "Ruby"
 	}
 
-	let msg = "Project *Evergreen* :evergreen_tree:\n_Monitoring the " + config.targetOrganisation + " GitHub organisation_"
+	const blocks = []
+	const divider = {"type": "divider"}
 
-	if (!config.repeatOutdated) {
-		msg += "\nNote: Dependencies which were previously reported as outdated are not shown here unless a new major version is released."
+	const basicSection = function(text: string){
+		return {
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": text
+			}
+		}
 	}
 
-	msg += "\n"
+	const basicHeader = function(text: string){
+		return {"type": "header", "text": {"type": "plain_text", "text": text}}
+	}
 
+	const header = "Project Evergreen :evergreen_tree: Update"
+
+	blocks.push(basicHeader(header))
+	blocks.push(basicSection("\n_Monitoring the " + config.targetOrganisation + " GitHub organisation_"))
+
+	if (!config.repeatOutdated) {
+		blocks.push(
+			{
+				"type": "context",
+				"elements": [
+					{
+						"text": "Note: Dependencies which were previously reported as outdated are not shown here unless a new major version is released.",
+						"type": "mrkdwn"
+					}
+				]
+			}
+		)
+	}
+
+	
 	for (const [language, repos] of rawMsgData) {
+		blocks.push(divider)
 		const languageName = (getProperty(languageMap, language as any) || language)
 		if (repos.length == 0) {
-			msg += "\nAll dependencies of " + languageName + "  repositories are up-to-date!\n"
+			blocks.push(basicSection("All dependencies of " + languageName + " repositories are up-to-date!"))
+
 		} else {
-			msg += "\nFor repositories written in " + languageName + ":\n"
+			blocks.push(basicSection("For repositories written in " + languageName + ":"))
+			let msg = ""
 			for (const x of repos) {
 				const user = x.current
 				const deps = x.deps
 
 				msg += "\tFor package " + formatLink(user) + ":\n"
 				for (const dep of deps) {
+					if(msg.length > 2900){
+						blocks.push(basicSection(msg))
+						msg = ""
+					}
 					msg += "\t\t- Dependency " + formatLink(dep.latest) + " is out of date by " + dep.dif + " majors.\n"
 				}
 				msg += "\n"
 			}
+			blocks.push(basicSection(msg))
 		}
 	}
-	return { "text": msg }
+	return {"text": header, "blocks": blocks}//,{ "text": msg }]}
 }
 
 //Calls the crawler and returns the results
