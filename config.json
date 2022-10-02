@@ -1,3 +1,4 @@
 {
-	"targetOrganisation": "octokit"
+	"targetOrganisation": "octokit",
+	"repeatOutdated": false
 }

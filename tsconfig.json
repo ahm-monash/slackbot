@@ -21,7 +21,13 @@
 		"target": "es5",
 		"experimentalDecorators": true,
 		"downlevelIteration": true,
-		"sourceMap": true
+		"sourceMap": true,
+		// "allowJs": true,
+		// "checkJs": false,
+		// "skipLibCheck": true,
+		// "forceConsistentCasingInFileNames": true,
+		// "incremental": true,
+		//"baseUrl": "./src",
 	},
 	"include": [
 		"src/**/*.ts"
